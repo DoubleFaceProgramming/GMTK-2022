@@ -4,8 +4,10 @@ import pygame
 import time
 import sys
 
-from src.globals import *
 from src.player import Player
+from src.level import Level
+from src.globals import *
+
 
 class Game:
     def __init__(self) -> None:
@@ -17,7 +19,7 @@ class Game:
 
         pygame.display.set_caption("Just DIE!!")
 
-        self.player = Player(self)
+        self.level = Level(self, "development")
 
     def run(self):
         while self.running:
@@ -34,13 +36,15 @@ class Game:
     def update(self) -> None:
         self.dt = self.clock.tick_busy_loop(FPS) / 1000
         self.events()
-
-        self.player.update()
+        
+        pygame.display.set_caption(f"Just DIE!! | {int(self.clock.get_fps())}")
+        
+        self.level.update()
 
     def draw(self) -> None:
         self.screen.fill((20, 24, 28))
 
-        self.player.draw()
+        self.level.draw()
 
         pygame.display.flip()
 
