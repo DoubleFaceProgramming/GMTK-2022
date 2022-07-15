@@ -1,10 +1,11 @@
 from pygame.locals import *
-from random import * # TODO: "*"" bad :(
+from random import *
 import pygame
 import time
 import sys
 
 from src.globals import *
+from src.player import Player
 
 class Game:
     def __init__(self) -> None:
@@ -12,6 +13,11 @@ class Game:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), DOUBLEBUF | HWSURFACE)
         self.clock = pygame.time.Clock()
         self.running = True
+        self.dt = self.clock.tick_busy_loop(FPS) / 1000
+
+        pygame.display.set_caption("Just DIE!!")
+
+        self.player = Player(self)
 
     def run(self):
         while self.running:
@@ -26,10 +32,16 @@ class Game:
                 self.running = False
 
     def update(self) -> None:
-        self.clock.tick_busy_loop(144)
+        self.dt = self.clock.tick_busy_loop(FPS) / 1000
         self.events()
 
+        self.player.update()
+
     def draw(self) -> None:
+        self.screen.fill((20, 24, 28))
+
+        self.player.draw()
+
         pygame.display.flip()
 
     def quit(self) -> None:
