@@ -100,21 +100,16 @@ class Dice(Sprite):
                 num = self.faces[DIREC.TOP]["num"]
 
                 positions = [self.pos + direction.value * i for i in range(1, num + 1)]
-                level = self.game.level
 
                 for pos in positions:
                     try:
-                        level[pos].kill()
-                        # del level[pos]
-                        # if level[pos]
-                        level[pos] = DiceFace(self.game, pos)
+                        self.game.level[pos].kill()
+                        if type(self.game.level[pos]) == Void:
+                            self.game.level[pos] = DiceFace(self.game, pos)
                     except IndexError:
                         pass # This os fine.
 
-
                 direction = None
-                # self.kill()
-                # level[self.pos] = None
 
             if direction:
                 self.roll(direction)
