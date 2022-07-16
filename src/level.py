@@ -57,11 +57,11 @@ class Dice(Sprite):
         self.roll_timer = time.time()
 
     def roll(self, direction: DIREC) -> None:
-        # if time.time() - self.roll_timer > 1.5:
-        self.faces = rotate_dice(self.faces, direction)
-        self.image = dice_imgs[self.faces[DIREC.TOP]["num"]]
-        self.image = pygame.transform.rotate(self.image, self.faces[DIREC.TOP]["rot"])
-        self.roll_timer = time.time()
+        if time.time() - self.roll_timer > 0.2:
+            self.faces = rotate_dice(self.faces, direction)
+            self.image = dice_imgs[self.faces[DIREC.TOP]["num"]]
+            self.image = pygame.transform.rotate(self.image, self.faces[DIREC.TOP]["rot"])
+            self.roll_timer = time.time()
 
     def update(self) -> None:
         player = self.game.level.player
@@ -70,18 +70,22 @@ class Dice(Sprite):
         # if new_rect.colliderect(self.rect):
         #     pixel_pos = self.pos * TILE_SIZE # pixel position of this tile
         #     if d_pos.x > 0: # left collision pushout
+        #         player.pos.x = pixel_pos.x - player.size.x
         #         self.roll(DIREC.RIGHT) # player is left, roll right
         #         self.pos.x += 1
         #     elif d_pos.x < 0: # right collision pushout
+        #         player.pos.x = pixel_pos.x + TILE_SIZE
         #         self.roll(DIREC.LEFT) # player is right, roll left
         #         self.pos.x -= 1
         # new_rect = pygame.Rect(player.pos.x, player.prev_pos.y + d_pos.y, *player.size) # we move y now
         # if new_rect.colliderect(self.rect):
         #     pixel_pos = self.pos * TILE_SIZE # pixel position of this tile
         #     if d_pos.y > 0: # top collision pushout
+        #         player.pos.y = pixel_pos.y - player.size.y
         #         self.roll(DIREC.DOWN) # player is up, roll down
         #         self.pos.y += 1
         #     elif d_pos.y < 0: # bottom collision pushout
+        #         player.pos.y = pixel_pos.y + TILE_SIZE
         #         self.roll(DIREC.UP) # player is down, roll up
         #         self.pos.y -= 1
 
@@ -91,14 +95,19 @@ class Dice(Sprite):
 
         screen_pos = self.pos * TILE_SIZE
 
-
         if player.rect.colliderect(r):
-            
-            # self.pos += (sign(d_pos.x), sign(d_pos.y))
-
-            if player.pos.y > screen_pos.y and sign(d_pos.y) < 0:
+            if player.pos.y + player.size.y > screen_pos.y + TILE_SIZE + player.size.y - 3 and sign(d_pos.y) < 0:
                 self.roll(DIREC.UP)
                 self.pos.y += sign(d_pos.y)
+            elif player.pos.y < screen_pos.y - player.size.y + 3 and sign(d_pos.y) > 0:
+                self.roll(DIREC.DOWN)
+                self.pos.y += sign(d_pos.y)
+            elif player.pos.x + player.size.x > screen_pos.x + TILE_SIZE + player.size.x - 3 and sign(d_pos.x) < 0:
+                self.roll(DIREC.LEFT)
+                self.pos.x += sign(d_pos.x)
+            elif player.pos.x < screen_pos.x - player.size.x + 3 and sign(d_pos.x) > 0:
+                self.roll(DIREC.RIGHT)
+                self.pos.x += sign(d_pos.x)
 
             if isinstance(self.game.level.map[int(self.pos.y)][int(self.pos.x)], Void):
                 player.pos = player.prev_pos
