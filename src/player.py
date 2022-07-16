@@ -27,8 +27,8 @@ class Camera:
         self.offset = intvec(self.actual_offset)
 
 class Player(Sprite):
-    def __init__(self, game: Game, pos: VEC) -> None:
-        super().__init__(game, pos)
+    def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC) -> None:
+        super().__init__(layer, game, pos)
         self.size = VEC(30, 30)
         self.pos = VEC(pos) * TILE_SIZE
         self.prev_pos = self.pos

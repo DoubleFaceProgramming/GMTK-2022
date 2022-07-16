@@ -4,6 +4,7 @@ import pygame
 import time
 import sys
 
+from src.sprite import SpriteManager
 from src.player import Player
 from src.level import Level
 from src.globals import *
@@ -19,6 +20,7 @@ class Game:
 
         pygame.display.set_caption("Just DIE!!")
 
+        self.sprite_manager = SpriteManager()
         self.level = Level(self, "development")
 
     def run(self):
@@ -36,16 +38,14 @@ class Game:
     def update(self) -> None:
         self.dt = self.clock.tick_busy_loop(FPS) / 1000
         self.events()
-        
         pygame.display.set_caption(f"Just DIE!! | {int(self.clock.get_fps())}")
-        
-        self.level.update()
+
+        self.sprite_manager.update()
 
     def draw(self) -> None:
         self.screen.fill((20, 24, 28))
 
-        self.level.draw()
-
+        self.sprite_manager.draw()
         pygame.display.flip()
 
     def quit(self) -> None:
