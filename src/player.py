@@ -57,4 +57,4 @@ class Player(Sprite):
         self.rect.topleft = self.pos - self.camera.offset
 
     def draw(self) -> None:
-        pygame.draw.rect(self.game.screen, (255, 0, 0), self.rect, 2)
+        pygame.draw.rect(self.game.screen, (255, 0, 0), self.rect)

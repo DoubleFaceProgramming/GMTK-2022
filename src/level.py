@@ -27,10 +27,6 @@ class Void(Sprite):
         r.topleft = self.pos * TILE_SIZE - player.camera.offset
 
         if player.rect.colliderect(r):
-            self.pos += (sign(d_pos.x), sign(d_pos.y))
-
-            print(self.pos, base_pos)
-
             if isinstance(self.game.level[self.pos], Void):
                 player.pos = player.prev_pos
                 self.pos = base_pos
@@ -108,7 +104,7 @@ class Dice(Sprite):
                         if type(self.game.level[pos]) == Void:
                             self.game.level[pos] = DiceFace(self.game, pos)
                     except AttributeError:
-                        pass # This is fine.
+                        self.game.level[pos] = Void(LayersEnum.WORLD, self.game, pos) # This is fine.
 
                 direction = None
 
@@ -119,8 +115,6 @@ class Dice(Sprite):
         super().draw()
         r = self.image.get_rect()
         r.topleft = self.pos * TILE_SIZE - self.game.level.player.camera.offset
-
-        pygame.draw.rect(self.game.screen, (255, 0, 0), r, width=2)
 
 class End(Sprite):
     def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC):
