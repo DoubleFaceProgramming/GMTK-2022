@@ -13,7 +13,3 @@ class DIREC(Enum):
     RIGHT = VEC(1, 0)
     TOP = 1
     BOTTOM = -1
-
-dice_rotations = [
-    
-]
