@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING: from src.game import Game
 
+from src.utils import rotate_dice, sign, newvec
 from build.exe_comp import pathof
-from src.utils import rotate_dice
 from src.images import dice_imgs
 from src.sprite import Sprite
 from src.player import Player
@@ -66,23 +66,49 @@ class Dice(Sprite):
         player = self.game.level.player
         d_pos = player.pos - player.prev_pos # delta_pos
         new_rect = pygame.Rect(player.prev_pos.x + d_pos.x, player.prev_pos.y, *player.size) # player rect but we move x first
-        if new_rect.colliderect(self.rect):
-            pixel_pos = self.pos * TILE_SIZE # pixel position of this tile
-            if d_pos.x > 0: # left collision pushout
-                player.pos.x = pixel_pos.x - player.size.x
-                self.roll(DIREC.RIGHT) # player is left, roll right
-            elif d_pos.x < 0: # right collision pushout
-                player.pos.x = pixel_pos.x + TILE_SIZE
-                self.roll(DIREC.LEFT) # player is right, roll left
-        new_rect = pygame.Rect(player.pos.x, player.prev_pos.y + d_pos.y, *player.size) # we move y now
-        if new_rect.colliderect(self.rect):
-            pixel_pos = self.pos * TILE_SIZE # pixel position of this tile
-            if d_pos.y > 0: # top collision pushout
-                player.pos.y = pixel_pos.y - player.size.y
-                self.roll(DIREC.DOWN) # player is up, roll down
-            elif d_pos.y < 0: # bottom collision pushout
-                player.pos.y = pixel_pos.y + TILE_SIZE
-                self.roll(DIREC.UP) # player is down, roll up
+        # if new_rect.colliderect(self.rect):
+        #     pixel_pos = self.pos * TILE_SIZE # pixel position of this tile
+        #     if d_pos.x > 0: # left collision pushout
+        #         player.pos.x = pixel_pos.x - player.size.x
+        #         self.roll(DIREC.RIGHT) # player is left, roll right
+        #         self.pos.x += 1
+        #     elif d_pos.x < 0: # right collision pushout
+        #         player.pos.x = pixel_pos.x + TILE_SIZE
+        #         self.roll(DIREC.LEFT) # player is right, roll left
+        #         self.pos.x = 1
+        # new_rect = pygame.Rect(player.pos.x, player.prev_pos.y + d_pos.y, *player.size) # we move y now
+        # if new_rect.colliderect(self.rect):
+        #     pixel_pos = self.pos * TILE_SIZE # pixel position of this tile
+        #     if d_pos.y > 0: # top collision pushout
+        #         player.pos.y = pixel_pos.y - player.size.y
+        #         self.roll(DIREC.DOWN) # player is up, roll down
+        #         self.pos.y += 1
+        #     elif d_pos.y < 0: # bottom collision pushout
+        #         player.pos.y = pixel_pos.y + TILE_SIZE
+        #         self.roll(DIREC.UP) # player is down, roll up
+        #         self.pos.y -= 1
+        #         print("triggered")
+
+        base_pos = newvec(self.pos)
+        r = self.image.get_rect()
+        r.topleft = self.pos * TILE_SIZE - self.game.level.player.camera.offset
+
+        if player.rect.colliderect(r):
+            self.pos += (sign(d_pos.x), sign(d_pos.y))
+
+            print(self.pos, base_pos)
+
+            if isinstance(self.game.level.map[int(self.pos.y)][int(self.pos.x)], Void):
+                player.pos = player.prev_pos
+                self.pos = base_pos
+
+    def draw(self):
+        super().draw()
+        r = self.image.get_rect()
+        r.topleft = self.pos * TILE_SIZE - self.game.level.player.camera.offset
+        
+        # print(self.pos)
+        pygame.draw.rect(self.game.screen, (255, 0, 0), r, width=2)
 
 class SpriteTypes(Enum):
     VOID = Void

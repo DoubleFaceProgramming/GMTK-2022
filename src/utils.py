@@ -5,6 +5,8 @@ from src.globals import VEC, DIREC
 
 intvec = lambda v: VEC(int(v.x), int(v.y))
 inttup = lambda t: (int(t[0]), int(t[1]))
+newvec = lambda v: VEC(v.x, v.y)
+sign   = lambda n: (n > 0) - (n < 0)
 
 def rotate_dice(current: dict[DIREC, dict[str, int]], direction: DIREC):
     orig = deepcopy(current) # just ".copy()" won't copy nested dicts, thus deepcopy

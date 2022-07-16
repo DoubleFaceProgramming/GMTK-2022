@@ -54,6 +54,7 @@ class Player(Sprite):
         self.pos += self.vel * self.game.dt
         self.tile_pos = self.pos // TILE_SIZE
         self.rect = pygame.Rect(self.pos, self.size)
+        self.rect.topleft = self.pos - self.camera.offset
 
     def draw(self) -> None:
-        pygame.draw.rect(self.game.screen, (255, 0, 0), (*(self.pos - self.camera.offset), *self.size), 2)
+        pygame.draw.rect(self.game.screen, (255, 0, 0), self.rect, 2)
