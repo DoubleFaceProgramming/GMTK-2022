@@ -13,7 +13,27 @@ from enum import Enum
 import pygame
 
 class Void(Sprite):
-    pass
+    def update(self) -> None:
+        player = self.game.level.player
+
+        self.rect.topleft = self.pos * TILE_SIZE + player.size // 2
+        self.rect.size = VEC(TILE_SIZE, TILE_SIZE) - player.size
+
+        d_pos = player.pos - player.prev_pos # delta_pos
+        new_rect = pygame.Rect(player.prev_pos.x + d_pos.x, player.prev_pos.y, *player.size) # player rect but we move x first
+        if new_rect.colliderect(self.rect):
+            pixel_pos = self.pos * TILE_SIZE + player.size // 2 # pixel position of this tile but the collision is smaller
+            if d_pos.x > 0: # left collision pushout
+                player.pos.x = pixel_pos.x - player.size.x
+            elif d_pos.x < 0: # right collision pushout
+                player.pos.x = pixel_pos.x + TILE_SIZE - player.size.x
+        new_rect = pygame.Rect(player.pos.x, player.prev_pos.y + d_pos.y, *player.size) # we move y now
+        if new_rect.colliderect(self.rect):
+            pixel_pos = self.pos * TILE_SIZE + player.size // 2 # pixel position of this tile but the collision is smaller
+            if d_pos.y > 0: # top collision pushout
+                player.pos.y = pixel_pos.y - player.size.y
+            elif d_pos.y < 0: # bottom collision pushout
+                player.pos.y = pixel_pos.y + TILE_SIZE - player.size.y
 
 class Floor(Sprite):
     def __init__(self, game: Game, pos: VEC):
@@ -26,8 +46,6 @@ class Dice(Sprite):
         self.image.fill((0, 255, 0))
 
     def update(self) -> None:
-        super().update()
-
         player = self.game.level.player
         d_pos = player.pos - player.prev_pos # delta_pos
         new_rect = pygame.Rect(player.prev_pos.x + d_pos.x, player.prev_pos.y, *player.size) # player rect but we move x first

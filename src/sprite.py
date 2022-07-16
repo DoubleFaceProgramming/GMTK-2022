@@ -19,7 +19,8 @@ class Sprite:
         self.rect.topleft = self.pos * TILE_SIZE
     
     def update(self):
-        self.rect.topleft = self.pos * TILE_SIZE
+        # Nothing in this but has to exist bcs update will be called on all tiles no matter what
+        pass
 
     def draw(self):
         self.game.screen.blit(self.image, self.pos * TILE_SIZE - self.game.level.player.camera.offset)
