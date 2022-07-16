@@ -92,13 +92,14 @@ class Dice(Sprite):
                 direction = DIREC.RIGHT
                 self.pos.x += sign(d_pos.x)
 
-            print(type(self.game.level[self.pos]))
+            # print(type(self.game.level[self.pos]))
 
             if isinstance(self.game.level[self.pos], Void):
                 player.pos = player.prev_pos # TODO: ex. dice on left, hold a, tapping s/w does nothing
                 self.pos = base_pos
                 num = self.faces[DIREC.TOP]["num"]
 
+                self.faces[DIREC.TOP]["num"] = 0
                 positions = [self.pos + direction.value * i for i in range(1, num + 1)]
 
                 for pos in positions:
@@ -107,7 +108,7 @@ class Dice(Sprite):
                         if type(self.game.level[pos]) == Void:
                             self.game.level[pos] = DiceFace(self.game, pos)
                     except IndexError:
-                        pass # This os fine.
+                        pass # This is fine.
 
                 direction = None
 

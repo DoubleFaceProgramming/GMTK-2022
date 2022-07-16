@@ -9,7 +9,7 @@ def load_dice_img(num):
     return pygame.transform.scale(pygame.image.load(f"res/assets/dice-{num}.png").convert(), (TILE_SIZE, TILE_SIZE))
 
 dice_imgs = [
-    None, # Cuz the numbers start at 1
+    load_dice_img(0),
     load_dice_img(1),
     load_dice_img(2),
     load_dice_img(3),
