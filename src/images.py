@@ -18,4 +18,6 @@ dice_imgs = [
     load_dice_img(6)
 ]
 
+amogus = pygame.transform.scale(pygame.image.load(f"res/assets/sussy.jpg").convert(), (TILE_SIZE, TILE_SIZE))
+
 pygame.display.quit()

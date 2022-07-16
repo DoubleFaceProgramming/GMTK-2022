@@ -5,13 +5,14 @@ if TYPE_CHECKING: from src.game import Game
 
 from src.utils import rotate_dice, sign, newvec
 from src.sprite import Sprite, LayersEnum
+from src.images import dice_imgs, amogus
 from build.exe_comp import pathof
-from src.images import dice_imgs
 from src.player import Player
 from src.globals import *
 
 from pygame.locals import *
 from abc import abstractmethod
+from json import loads
 from enum import Enum
 import pygame
 import time
@@ -40,10 +41,14 @@ class Floor(Sprite):
         super().__init__(layer, game, pos)
         self.image.fill((200, 200, 200))
 
+class DiceFace(Sprite):
+    def __init__(self, game: Game, pos: VEC):
+        super().__init__(LayersEnum.WORLD, game, pos)
+        self.image.fill((255, 255, 255))
+
 class Dice(Sprite):
     def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC):
-        layer = LayersEnum.MOVEABLES
-        super().__init__(layer, game, pos)
+        super().__init__(LayersEnum.MOVEABLES, game, pos)
         # self.image.fill((0, 255, 0))
         self.faces = {
             DIREC.TOP: {"num": 1, "rot": 0},
@@ -66,28 +71,6 @@ class Dice(Sprite):
     def update(self) -> None:
         player = self.game.level.player
         d_pos = player.pos - player.prev_pos # delta_pos
-        # new_rect = pygame.Rect(player.prev_pos.x + d_pos.x, player.prev_pos.y, *player.size) # player rect but we move x first
-        # if new_rect.colliderect(self.rect):
-        #     pixel_pos = self.pos * TILE_SIZE # pixel position of this tile
-        #     if d_pos.x > 0: # left collision pushout
-        #         player.pos.x = pixel_pos.x - player.size.x
-        #         self.roll(DIREC.RIGHT) # player is left, roll right
-        #         self.pos.x += 1
-        #     elif d_pos.x < 0: # right collision pushout
-        #         player.pos.x = pixel_pos.x + TILE_SIZE
-        #         self.roll(DIREC.LEFT) # player is right, roll left
-        #         self.pos.x -= 1
-        # new_rect = pygame.Rect(player.pos.x, player.prev_pos.y + d_pos.y, *player.size) # we move y now
-        # if new_rect.colliderect(self.rect):
-        #     pixel_pos = self.pos * TILE_SIZE # pixel position of this tile
-        #     if d_pos.y > 0: # top collision pushout
-        #         player.pos.y = pixel_pos.y - player.size.y
-        #         self.roll(DIREC.DOWN) # player is up, roll down
-        #         self.pos.y += 1
-        #     elif d_pos.y < 0: # bottom collision pushout
-        #         player.pos.y = pixel_pos.y + TILE_SIZE
-        #         self.roll(DIREC.UP) # player is down, roll up
-        #         self.pos.y -= 1
 
         base_pos = newvec(self.pos)
         r = self.image.get_rect()
@@ -95,23 +78,39 @@ class Dice(Sprite):
 
         screen_pos = self.pos * TILE_SIZE
 
+        direction = None
         if player.rect.colliderect(r):
             if player.pos.y + player.size.y > screen_pos.y + TILE_SIZE + player.size.y - 3 and sign(d_pos.y) < 0:
-                self.roll(DIREC.UP)
+                direction = DIREC.UP
                 self.pos.y += sign(d_pos.y)
             elif player.pos.y < screen_pos.y - player.size.y + 3 and sign(d_pos.y) > 0:
-                self.roll(DIREC.DOWN)
+                direction = DIREC.DOWN
                 self.pos.y += sign(d_pos.y)
             elif player.pos.x + player.size.x > screen_pos.x + TILE_SIZE + player.size.x - 3 and sign(d_pos.x) < 0:
-                self.roll(DIREC.LEFT)
+                direction = DIREC.LEFT
                 self.pos.x += sign(d_pos.x)
             elif player.pos.x < screen_pos.x - player.size.x + 3 and sign(d_pos.x) > 0:
-                self.roll(DIREC.RIGHT)
+                direction = DIREC.RIGHT
                 self.pos.x += sign(d_pos.x)
 
-            if isinstance(self.game.level.map[int(self.pos.y)][int(self.pos.x)], Void):
-                player.pos = player.prev_pos
+            if isinstance(self.game.level[self.pos], Void):
+                player.pos = player.prev_pos # TODO: ex. dice on left, hold a, tapping s/w does nothing
                 self.pos = base_pos
+                num = self.faces[DIREC.TOP]["num"]
+
+                positions = [self.pos + direction.value * i for i in range(1, num + 1)]
+                level = self.game.level
+
+                for pos in positions:
+                    level[pos].kill()
+                    level[pos] = DiceFace(self.game, pos)
+
+                direction = None
+                self.kill()
+                level[self.pos] = None
+
+            if direction:
+                self.roll(direction)
 
     def draw(self):
         super().draw()
@@ -120,38 +119,33 @@ class Dice(Sprite):
 
         pygame.draw.rect(self.game.screen, (255, 0, 0), r, width=2)
 
+class End(Sprite):
+    def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC):
+        super().__init__(layer, game, pos)
+        self.image.blit(amogus, (0, 0))
+
 class SpriteTypes(Enum):
     VOID = Void
     FLOOR = Floor
     PLAYER = Player
     DICE = Dice
+    END = End
 
 class Level:
     def __init__(self, game: Game, level_name: str):
         self.game = game
 
-        path = pathof(f"res/levels/{level_name}.jdmap")
-        contents = [raw.strip() for raw in open(path).readlines() if raw != "\n"]
-
-        for index, line in enumerate(contents):
-            if line == "-":
-                delimiter = int(index)
-                break
-
-        legends = {}
-        for entry in contents[:delimiter]:
-            key, value = [token.strip() for token in entry.split(":")]
-            legends.update({key: value})
-
-        data = []
-        for row in contents[delimiter + 1:]:
-            data.append([tile for tile in row])
+        path = pathof(f"res/levels/{level_name}.json")
+        parsed = loads(open(path, "rb").read())
+        legend = parsed["legend"]
+        dice_data = parsed["die"]
+        map_data = parsed["map"]
 
         self.map = []
-        for i, row in enumerate(data):
+        for i, row in enumerate(map_data):
             self.map.append([])
             for j, tile in enumerate(row):
-                key = legends[tile].upper()
+                key = legend[str(tile)].upper()
                 type_class = SpriteTypes[key].value
                 if type_class != Player:
                     sprite = type_class(LayersEnum.WORLD, self.game, (j, i))
@@ -161,3 +155,9 @@ class Level:
                     player_tile_pos = (j, i)
 
         self.player = Player(LayersEnum.MOVEABLES, self.game, player_tile_pos)
+
+    def __getitem__(self, key: VEC):
+        return self.map[int(key.y)][int(key.x)]
+
+    def __setitem__(self, key: VEC, value: ...):
+        self.map[int(key.y) - 1][int(key.x) - 1] = value

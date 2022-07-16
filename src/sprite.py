@@ -167,8 +167,6 @@ class SpriteManager:
     def remove(self, sprite: Sprite) -> None:
         try: # Remove the sprite
             self.layers[sprite._layer].remove(sprite)
-            if sprite._layer != sprite._debug_layer:
-                self.layers[sprite._debug_layer].remove(sprite)
         except ValueError: # If the sprite was not in its corresponding layer list
             raise SpriteNotFoundException(sprite)
         except KeyError: # If the sprite's layer was not in the layer dict
@@ -183,8 +181,7 @@ class SpriteManager:
         # We need to copy self.layers because otheriwse when sprites are created whilst rendering it would crash
         for layer in (layers := self.layers.copy()): # Loop through every layer
             for sprite in layers[layer]: # Loop through every sprite
-                if not LayersEnum(layer).name.endswith("_DEBUG"): # Draw every layer that isnt a debug layer
-                    sprite.draw()
+                sprite.draw()
 
     def update(self) -> None:
         for sprite in self:
