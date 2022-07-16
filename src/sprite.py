@@ -19,6 +19,7 @@ import pygame
 class LayersEnum(Enum):
     WORLD = auto()
     MOVEABLES = auto()
+    VOID = auto()
 
 class Sprite:
     """A common baseclass for all sprites."""
@@ -63,7 +64,7 @@ class Sprite:
         try:
             self.game.sprite_manager.remove(self)
         except SpriteNotFoundException:
-            pass
+            print("LIFE IS SUFFERING")
         del self
 
 class NoLayerAttributeException(Exception):

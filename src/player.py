@@ -34,7 +34,7 @@ class Player(Sprite):
         self.prev_pos = self.pos
         self.tile_pos = VEC(pos)
         self.vel = VEC(0, 0)
-        self.speed = 150
+        self.speed = 300
         self.camera = Camera(self.game, self)
         self.rect = pygame.Rect(self.pos - self.size // 2, self.size)
 

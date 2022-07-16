@@ -18,18 +18,17 @@ import pygame
 import time
 
 class Void(Sprite):
+    def __init__(self, layer, game: Game, pos: VEC) -> None:
+        super().__init__(LayersEnum.VOID, game, pos)
+    
     def update(self) -> None:
         player = self.game.level.player
-        d_pos = player.pos - player.prev_pos
 
-        base_pos = newvec(self.pos)
         r = self.image.get_rect()
         r.topleft = self.pos * TILE_SIZE - player.camera.offset
 
         if player.rect.colliderect(r):
-            if isinstance(self.game.level[self.pos], Void):
-                player.pos = player.prev_pos
-                self.pos = base_pos
+            player.pos = player.prev_pos
 
 class Floor(Sprite):
     def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC):
@@ -88,10 +87,13 @@ class Dice(Sprite):
                 direction = DIREC.RIGHT
                 self.pos.x += sign(d_pos.x)
 
-            # print(type(self.game.level[self.pos]))
+            if isinstance(self.game.level[self.pos], Wall):
+                player.pos = player.prev_pos
+                self.pos = base_pos
+                return
 
             if isinstance(self.game.level[self.pos], Void):
-                player.pos = player.prev_pos # TODO: ex. dice on left, hold a, tapping s/w does nothing
+                player.pos = player.prev_pos
                 self.pos = base_pos
                 num = self.faces[DIREC.TOP]["num"]
 
@@ -100,11 +102,11 @@ class Dice(Sprite):
 
                 for pos in positions:
                     try:
-                        self.game.level[pos].kill()
                         if type(self.game.level[pos]) == Void:
+                            self.game.level[pos].kill()
                             self.game.level[pos] = DiceFace(self.game, pos)
                     except AttributeError:
-                        self.game.level[pos] = Void(LayersEnum.WORLD, self.game, pos) # This is fine.
+                        pass
 
                 direction = None
 
@@ -121,12 +123,27 @@ class End(Sprite):
         super().__init__(layer, game, pos)
         self.image.blit(amogus, (0, 0))
 
+class Wall(Sprite):
+    def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC) -> None:
+        super().__init__(layer, game, pos)
+        self.image.fill((200, 200, 70))
+
+    def update(self) -> None:
+        player = self.game.level.player
+
+        r = self.image.get_rect()
+        r.topleft = self.pos * TILE_SIZE - player.camera.offset
+
+        if player.rect.colliderect(r):
+            player.pos = player.prev_pos
+
 class SpriteTypes(Enum):
     VOID = Void
     FLOOR = Floor
     PLAYER = Player
     DICE = Dice
     END = End
+    WALL = Wall
 
 class Level:
     def __init__(self, game: Game, level_name: str):
@@ -154,13 +171,11 @@ class Level:
                     sprite = Floor(LayersEnum.WORLD, self.game, (j, i))
                 else:
                     sprite = type_class(LayersEnum.WORLD, self.game, (j, i))
-                self.game.sprite_manager.add(sprite)
                 self.map[i].append(sprite)
 
         self.player = Player(LayersEnum.MOVEABLES, self.game, player_tile_pos)
         for pos in die_pos:
             self.die.append(Dice(LayersEnum.MOVEABLES, self.game, pos))
-
 
     def __getitem__(self, key: VEC):
         try:
