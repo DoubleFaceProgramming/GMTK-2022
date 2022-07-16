@@ -31,7 +31,7 @@ class Void(Sprite):
 
             print(self.pos, base_pos)
 
-            if isinstance(self.game.level.map[int(self.pos.y)][int(self.pos.x)], Void):
+            if isinstance(self.game.level[self.pos], Void):
                 player.pos = player.prev_pos
                 self.pos = base_pos
 
@@ -107,7 +107,7 @@ class Dice(Sprite):
                         self.game.level[pos].kill()
                         if type(self.game.level[pos]) == Void:
                             self.game.level[pos] = DiceFace(self.game, pos)
-                    except IndexError:
+                    except AttributeError:
                         pass # This is fine.
 
                 direction = None
@@ -150,7 +150,7 @@ class Level:
         for i, row in enumerate(map_data):
             self.map.append([])
             for j, tile in enumerate(row):
-                key = legend[str(tile)].upper()
+                key = legend[tile].upper()
                 type_class = SpriteTypes[key].value
                 if type_class == Player:
                     player_tile_pos = (j, i)
@@ -169,7 +169,10 @@ class Level:
 
 
     def __getitem__(self, key: VEC):
-        return self.map[int(key.y)][int(key.x)]
+        try:
+            return self.map[int(key.y)][int(key.x)]
+        except:
+            pass
 
     def __setitem__(self, key: VEC, value: ...):
         self.map[int(key.y)][int(key.x)] = value
