@@ -45,7 +45,7 @@ def rotate_dice(current: dict[DIREC, dict[str, int]], direction: DIREC):
     for i, face in enumerate(faces_to_rotate): # For every face in the faces that need to change positions
         # Set the face to the number of on the face in front it, at index 0 it becomes -1 thus looping back to the end of the list
         # which is why every face needs to be moved to the face after it instead of before, so that -1 index can be utilized python pog
-        new[face]["num"] = orig[faces_to_rotate[i - 1]]["num"]
+        new[face] = orig[faces_to_rotate[i - 1]].copy()
     return new
 
 # Test code
