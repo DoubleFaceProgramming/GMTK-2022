@@ -8,6 +8,7 @@ import pygame
 
 from src.images import title_img, restart_img, smol_dice_imgs, home_img
 from src.sprite import SpriteManager
+from build.exe_comp import pathof
 from src.button import Button
 from src.level import Level
 from src.globals import *
@@ -94,7 +95,7 @@ class LevelsMenu(Scene):
     def setup(self) -> None:
         super().setup()
 
-        self.maps = {" ".join(map.removesuffix(".json").split("_")).capitalize(): map.removesuffix(".json") for map in listdir("res/levels")}
+        self.maps = {" ".join(map.removesuffix(".json").split("_")).capitalize(): map.removesuffix(".json") for map in listdir(pathof("res/levels"))}
 
         for i, map in enumerate(self.maps.items()):
             Button(self.game, (WIDTH // 2, 50 + i * 75), map[0], lambda map=map: self.game.new_scene(self.game.Scenes.MainGame, path=map[1]), bloat=75)
