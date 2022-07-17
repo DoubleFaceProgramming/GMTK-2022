@@ -5,14 +5,15 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING: from src.game import Game
 
 from src.sprite import Sprite, LayersEnum
-from src.images import dice_imgs, amogus
 from src.utils import rotate_dice, sign
 from build.exe_comp import pathof
 from src.player import Player
 from src.globals import *
+from src.images import *
 
-from pygame.locals import *
 from abc import abstractmethod
+from pygame.locals import *
+from random import choices
 from json import loads
 from enum import Enum
 import pygame
@@ -34,7 +35,7 @@ class Void(Sprite):
 class Floor(Sprite):
     def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC):
         super().__init__(layer, game, pos)
-        self.image.fill((200, 200, 200))
+        self.image = floor_imgs[choices([0, 1, 2], [12, 1, 1])[0]]
 
 class DiceFace(Sprite):
     def __init__(self, game: Game, pos: VEC):
@@ -127,7 +128,7 @@ class End(Sprite):
 class Wall(Sprite):
     def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC) -> None:
         super().__init__(layer, game, pos)
-        self.image.fill((200, 200, 70))
+        self.image = wall_img
 
     def update(self) -> None:
         player = self.scene.level.player
