@@ -36,7 +36,7 @@ class Game:
 
     def update(self) -> None:
         self.dt = self.clock.tick_busy_loop(FPS) / 1000
-        pygame.display.set_caption(f"Just DIE!! | {int(self.clock.get_fps())}")
+        pygame.display.set_caption(f"The Dungeon of DIE")
         
         self.events = pygame.event.get()
         for event in self.events:
