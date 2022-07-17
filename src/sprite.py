@@ -19,6 +19,7 @@ class LayersEnum(Enum):
     VOID = auto()
     WORLD = auto()
     MOVEABLES = auto()
+    GUI = auto()
 
 class Sprite:
     """A common baseclass for all sprites."""

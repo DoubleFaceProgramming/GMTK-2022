@@ -4,7 +4,7 @@ import pygame
 import time
 import sys
 
-from src.scene import Scene, MainGame, MainMenu
+from src.scene import LevelsMenu, Scene, MainGame, MainMenu
 from src.player import Player
 from src.globals import *
 
@@ -45,11 +45,12 @@ class Game:
     class Scenes(Enum):
         MainGame = MainGame
         MainMenu = MainMenu
+        LevelsMenu = LevelsMenu
 
-    def new_scene(self, scene_class: Scene) -> None:
+    def new_scene(self, scene_class: Scene, **kwargs) -> None:
         self.scene.running = False
         self.scene = scene_class.value(self)
-        self.scene.setup()
+        self.scene.setup(**kwargs)
 
     def switch_scene(self, scene: Scene) -> None:
         # JIC, this is for if a scene needs to be saved and swapped back
