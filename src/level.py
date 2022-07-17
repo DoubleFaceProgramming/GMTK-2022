@@ -30,8 +30,7 @@ class Void(Sprite):
         r.topleft = self.pos * TILE_SIZE - player.camera.offset
 
         if player.rect.colliderect(r):
-            pass
-            # player.pos = player.prev_pos
+            player.pos = player.prev_pos
 
 class Floor(Sprite):
     def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC):
@@ -125,7 +124,7 @@ class Dice(Sprite):
 class End(Sprite):
     def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC):
         super().__init__(layer, game, pos)
-        self.image.blit(amogus, (0, 0))
+        self.image.blit(end, (0, 0))
 
     def update(self) -> None:
         player = self.scene.level.player

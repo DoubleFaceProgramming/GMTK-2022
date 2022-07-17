@@ -6,9 +6,10 @@ if TYPE_CHECKING: from src.game import Game
 from pygame.locals import *
 import pygame
 
-from src.globals import *
+from src.sprite import Sprite, LayersEnum
+from src.images import player_img
 from src.utils import intvec
-from src.sprite import Sprite
+from src.globals import *
 
 class Camera:
     def __init__(self, game: Game, player: Player) -> None:
@@ -29,7 +30,7 @@ class Camera:
 class Player(Sprite):
     def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC) -> None:
         super().__init__(layer, game, pos)
-        self.size = VEC(30, 30)
+        self.size = VEC(80 * 2 // 3, 80 * 2 // 3)
         self.pos = VEC(pos) * TILE_SIZE
         self.prev_pos = self.pos
         self.tile_pos = VEC(pos)
@@ -37,6 +38,7 @@ class Player(Sprite):
         self.speed = 300
         self.camera = Camera(self.game, self)
         self.rect = pygame.Rect(self.pos - self.size // 2, self.size)
+        self.facing = Direc.UP
 
     def update(self) -> None:
         self.camera.update()
@@ -44,11 +46,19 @@ class Player(Sprite):
         keys = pygame.key.get_pressed()
         self.vel = VEC(0, 0)
         if not (keys[K_w] and keys[K_s]):
-            if keys[K_w]: self.vel.y = -self.speed
-            elif keys[K_s]: self.vel.y = self.speed
+            if keys[K_w]:
+                self.vel.y = -self.speed
+                self.facing = Direc.UP
+            elif keys[K_s]:
+                self.vel.y = self.speed
+                self.facing = Direc.DOWN
         if not (keys[K_a] and keys[K_d]):
-            if keys[K_a]: self.vel.x = -self.speed
-            elif keys[K_d]: self.vel.x = self.speed
+            if keys[K_a]:
+                self.vel.x = -self.speed
+                self.facing = Direc.LEFT
+            elif keys[K_d]:
+                self.vel.x = self.speed
+                self.facing = Direc.RIGHT
 
         self.prev_pos = self.pos.copy()
         self.pos += self.vel * self.game.dt
@@ -57,4 +67,11 @@ class Player(Sprite):
         self.rect.topleft = self.pos - self.camera.offset
 
     def draw(self) -> None:
-        pygame.draw.rect(self.game.screen, (255, 0, 0), self.rect)
+        if self.facing == Direc.UP:
+            self.game.screen.blit(pygame.transform.rotate(player_img, 0), self.rect)
+        elif self.facing == Direc.DOWN:
+            self.game.screen.blit(pygame.transform.rotate(player_img, 180), self.rect)
+        elif self.facing == Direc.LEFT:
+            self.game.screen.blit(pygame.transform.rotate(player_img, 90), self.rect)
+        elif self.facing == Direc.RIGHT:
+            self.game.screen.blit(pygame.transform.rotate(player_img, 270), self.rect)

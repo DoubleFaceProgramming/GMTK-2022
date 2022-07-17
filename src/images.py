@@ -16,12 +16,14 @@ floor_imgs = [load_tile(f"res/assets/floor-{num}.png", pygame.transform.scale) f
 wall_img = load_tile("res/assets/wall.png", pygame.transform.scale).convert()
 dark_wall_img = load_tile("res/assets/wall_dark.png", pygame.transform.scale).convert()
 void_img = [None] + [load_tile(f"res/assets/void-{num}.png", pygame.transform.scale).convert() for num in range(1, 3 + 1)]
-amogus = load_tile("res/assets/sussy.jpg")
+end = load_tile("res/assets/end.png")
 title_img = pygame.image.load(pathof("res/assets/title.png")).convert_alpha()
 title_img = pygame.transform.smoothscale(title_img, VEC(title_img.get_size()) * 0.6)
 restart_img = pygame.image.load(pathof("res/assets/restart.png")).convert_alpha()
 restart_img = pygame.transform.smoothscale(restart_img, VEC(restart_img.get_size()) * 0.1)
 home_img = pygame.image.load(pathof("res/assets/home.png")).convert_alpha()
 home_img = pygame.transform.smoothscale(home_img, restart_img.get_size())
+player_img = pygame.image.load(pathof("res/assets/player.png")).convert_alpha()
+player_img = pygame.transform.smoothscale(player_img, (TILE_SIZE / 1.5, TILE_SIZE / 1.5))
 
 pygame.display.quit()

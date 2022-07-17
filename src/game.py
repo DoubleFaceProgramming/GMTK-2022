@@ -5,12 +5,14 @@ import time
 import sys
 
 from src.scene import LevelsMenu, Scene, MainGame, MainMenu
+from build.exe_comp import pathof
 from src.player import Player
 from src.globals import *
 
 class Game:
     def __init__(self) -> None:
         pygame.init()
+        pygame.mixer.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), DOUBLEBUF | HWSURFACE)
         self.clock = pygame.time.Clock()
         self.dt = self.clock.tick_busy_loop(FPS) / 1000
@@ -19,6 +21,10 @@ class Game:
 
         self.scene = MainMenu(self)
         self.scene.setup()
+        
+        pygame.mixer.music.load(pathof("res/sounds/dungeon_ambient_1.ogg"))
+        pygame.mixer.music.play(-1, 0)
+        pygame.mixer.music.set_volume(0.5)
 
     def run(self):
         while self.scene.running:
