@@ -1,11 +1,12 @@
 from __future__ import annotations
+from email.mime import base
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING: from src.game import Game
 
-from src.utils import rotate_dice, sign, newvec
 from src.sprite import Sprite, LayersEnum
 from src.images import dice_imgs, amogus
+from src.utils import rotate_dice, sign
 from build.exe_comp import pathof
 from src.player import Player
 from src.globals import *
@@ -20,7 +21,7 @@ import time
 class Void(Sprite):
     def __init__(self, layer, game: Game, pos: VEC) -> None:
         super().__init__(LayersEnum.VOID, game, pos)
-    
+
     def update(self) -> None:
         player = self.scene.level.player
 
@@ -52,20 +53,19 @@ class Dice(Sprite):
             DIREC.RIGHT: {"num": 3, "rot": 0}
         }
         self.image = dice_imgs[self.faces[DIREC.TOP]["num"]]
-        self.roll_timer = time.time()
+        self.create_tile_timer = time.time()
+        self.tile_positions = []
 
     def roll(self, direction: DIREC) -> None:
-        if time.time() - self.roll_timer > 0.2:
-            self.faces = rotate_dice(self.faces, direction)
-            self.image = dice_imgs[self.faces[DIREC.TOP]["num"]]
-            self.image = pygame.transform.rotate(self.image, self.faces[DIREC.TOP]["rot"])
-            self.roll_timer = time.time()
+        self.faces = rotate_dice(self.faces, direction)
+        self.image = dice_imgs[self.faces[DIREC.TOP]["num"]]
+        self.image = pygame.transform.rotate(self.image, self.faces[DIREC.TOP]["rot"])
 
     def update(self) -> None:
         player = self.scene.level.player
         d_pos = player.pos - player.prev_pos # delta_pos
 
-        base_pos = newvec(self.pos)
+        base_pos = self.pos.copy()
         r = self.image.get_rect()
         r.topleft = self.pos * TILE_SIZE - self.scene.level.player.camera.offset
 
@@ -87,30 +87,32 @@ class Dice(Sprite):
                 self.pos.x += sign(d_pos.x)
 
             if isinstance(self.scene.level[self.pos], Wall):
-                player.pos = player.prev_pos
-                self.pos = base_pos
-                return
-
-            if isinstance(self.scene.level[self.pos], Void):
-                player.pos = player.prev_pos
-                self.pos = base_pos
+                player.pos = player.prev_pos.copy()
+                self.pos = base_pos.copy()
+                direction = None
+            elif isinstance(self.scene.level[self.pos], Void):
+                player.pos = player.prev_pos.copy()
+                self.pos = base_pos.copy()
                 num = self.faces[DIREC.TOP]["num"]
 
                 self.faces[DIREC.TOP]["num"] = 0
-                positions = [self.pos + direction.value * i for i in range(1, num + 1)]
-
-                for pos in positions:
-                    try:
-                        if type(self.scene.level[pos]) == Void:
-                            self.scene.level[pos].kill()
-                            self.scene.level[pos] = DiceFace(self.game, pos)
-                    except AttributeError:
-                        pass
+                self.tile_positions = [self.pos + direction.value * i for i in range(1, num + 1)]
 
                 direction = None
 
             if direction:
                 self.roll(direction)
+
+        if self.tile_positions and time.time() - self.create_tile_timer > 0.1:
+            self.create_tile_timer = time.time()
+            pos = self.tile_positions[0]
+            self.tile_positions.pop(0)
+            try:
+                if type(self.scene.level[pos]) == Void:
+                    self.scene.level[pos].kill()
+                    self.scene.level[pos] = DiceFace(self.game, pos)
+            except AttributeError:
+                pass
 
     def draw(self):
         super().draw()

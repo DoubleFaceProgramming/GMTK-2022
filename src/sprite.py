@@ -16,9 +16,9 @@ import pygame
 # https://github.com/DoubleFaceProgramming/2DMC/blob/master/src/sprite.py <--- go check us out (pls)
 
 class LayersEnum(Enum):
+    VOID = auto()
     WORLD = auto()
     MOVEABLES = auto()
-    VOID = auto()
 
 class Sprite:
     """A common baseclass for all sprites."""
