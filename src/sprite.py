@@ -15,7 +15,6 @@ import pygame
 # This code was taken from 2DMC (not copyrighted because the developers and creators are USSSSSS)
 # https://github.com/DoubleFaceProgramming/2DMC/blob/master/src/sprite.py <--- go check us out (pls)
 
-
 class LayersEnum(Enum):
     WORLD = auto()
     MOVEABLES = auto()
@@ -36,13 +35,13 @@ class Sprite:
             else:
                 raise TypeError("Argument 'layer' must be of type 'int' or 'Enum item'")
 
-
         self.game = game
+        self.scene = self.game.scene
         self.pos = VEC(pos)
         self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
         self.rect = self.image.get_rect()
         self.rect.topleft = self.pos * TILE_SIZE
-        self.game.sprite_manager.add(self)
+        self.scene.sprite_manager.add(self)
 
     def update(self) -> None:
         """Update the classes attributes and variables or handle class logic related to the class.
@@ -57,12 +56,12 @@ class Sprite:
             screen (Surface): The screen to draw to
             **kwargs (dict[Any]): Class specific arguments
         """
-        self.game.screen.blit(self.image, self.pos * TILE_SIZE - self.game.level.player.camera.offset)
+        self.game.screen.blit(self.image, self.pos * TILE_SIZE - self.scene.level.player.camera.offset)
 
     def kill(self) -> None:
         """Kill the sprite and handle any cleanup logic"""
         try:
-            self.game.sprite_manager.remove(self)
+            self.scene.sprite_manager.remove(self)
         except SpriteNotFoundException:
             print("LIFE IS SUFFERING")
         del self

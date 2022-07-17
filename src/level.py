@@ -22,7 +22,7 @@ class Void(Sprite):
         super().__init__(LayersEnum.VOID, game, pos)
     
     def update(self) -> None:
-        player = self.game.level.player
+        player = self.game.scene.level.player
 
         r = self.image.get_rect()
         r.topleft = self.pos * TILE_SIZE - player.camera.offset
@@ -43,7 +43,6 @@ class DiceFace(Sprite):
 class Dice(Sprite):
     def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC):
         super().__init__(LayersEnum.MOVEABLES, game, pos)
-        # self.image.fill((0, 255, 0))
         self.faces = {
             DIREC.TOP: {"num": 1, "rot": 0},
             DIREC.BOTTOM: {"num": 4, "rot": 0},
@@ -63,12 +62,12 @@ class Dice(Sprite):
             self.roll_timer = time.time()
 
     def update(self) -> None:
-        player = self.game.level.player
+        player = self.scene.level.player
         d_pos = player.pos - player.prev_pos # delta_pos
 
         base_pos = newvec(self.pos)
         r = self.image.get_rect()
-        r.topleft = self.pos * TILE_SIZE - self.game.level.player.camera.offset
+        r.topleft = self.pos * TILE_SIZE - self.scene.level.player.camera.offset
 
         screen_pos = self.pos * TILE_SIZE
 
@@ -87,12 +86,12 @@ class Dice(Sprite):
                 direction = DIREC.RIGHT
                 self.pos.x += sign(d_pos.x)
 
-            if isinstance(self.game.level[self.pos], Wall):
+            if isinstance(self.scene.level[self.pos], Wall):
                 player.pos = player.prev_pos
                 self.pos = base_pos
                 return
 
-            if isinstance(self.game.level[self.pos], Void):
+            if isinstance(self.scene.level[self.pos], Void):
                 player.pos = player.prev_pos
                 self.pos = base_pos
                 num = self.faces[DIREC.TOP]["num"]
@@ -102,9 +101,9 @@ class Dice(Sprite):
 
                 for pos in positions:
                     try:
-                        if type(self.game.level[pos]) == Void:
-                            self.game.level[pos].kill()
-                            self.game.level[pos] = DiceFace(self.game, pos)
+                        if type(self.scene.level[pos]) == Void:
+                            self.scene.level[pos].kill()
+                            self.scene.level[pos] = DiceFace(self.game, pos)
                     except AttributeError:
                         pass
 
@@ -116,7 +115,7 @@ class Dice(Sprite):
     def draw(self):
         super().draw()
         r = self.image.get_rect()
-        r.topleft = self.pos * TILE_SIZE - self.game.level.player.camera.offset
+        r.topleft = self.pos * TILE_SIZE - self.scene.level.player.camera.offset
 
 class End(Sprite):
     def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC):
@@ -129,7 +128,7 @@ class Wall(Sprite):
         self.image.fill((200, 200, 70))
 
     def update(self) -> None:
-        player = self.game.level.player
+        player = self.scene.level.player
 
         r = self.image.get_rect()
         r.topleft = self.pos * TILE_SIZE - player.camera.offset
