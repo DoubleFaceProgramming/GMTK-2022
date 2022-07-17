@@ -22,7 +22,7 @@ class Void(Sprite):
         super().__init__(LayersEnum.VOID, game, pos)
     
     def update(self) -> None:
-        player = self.game.scene.level.player
+        player = self.scene.level.player
 
         r = self.image.get_rect()
         r.topleft = self.pos * TILE_SIZE - player.camera.offset

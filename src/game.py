@@ -4,7 +4,7 @@ import pygame
 import time
 import sys
 
-from src.scene import MainGame
+from src.scene import Scene, MainGame, MainMenu
 from src.player import Player
 from src.globals import *
 
@@ -15,9 +15,9 @@ class Game:
         self.clock = pygame.time.Clock()
         self.dt = self.clock.tick_busy_loop(FPS) / 1000
 
-        pygame.display.set_caption("Just DIE!!")
+        pygame.display.set_caption("The Dungeon of DIE")
 
-        self.scene = MainGame(self)
+        self.scene = MainMenu(self)
         self.scene.setup()
 
     def run(self):
@@ -38,11 +38,22 @@ class Game:
         pygame.display.set_caption(f"Just DIE!! | {int(self.clock.get_fps())}")
         self.events()
 
-    def new_scene(self, scene_class: str) -> None:
-        self.scene.running = False
-        self.scene = self.Scenes[scene_class].value(self, self.scene)
-        self.scene.setup()
-
     def quit(self) -> None:
         pygame.quit()
         sys.exit()
+
+    class Scenes(Enum):
+        MainGame = MainGame
+        MainMenu = MainMenu
+
+    def new_scene(self, scene_class: Scene) -> None:
+        self.scene.running = False
+        self.scene = scene_class.value(self)
+        self.scene.setup()
+
+    def switch_scene(self, scene: Scene) -> None:
+        # JIC, this is for if a scene needs to be saved and swapped back
+        # (ex. pause menu, when exited will resume the saved scene of the game)
+        self.scene.running = False
+        self.scene = scene
+        self.scene.running = True
