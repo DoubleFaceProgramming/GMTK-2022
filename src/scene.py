@@ -3,11 +3,11 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING: from src.game import Game
 
-from pygame.locals import K_SPACE, K_ESCAPE
+from pygame.locals import K_SPACE, K_ESCAPE, SRCALPHA
 import pygame
 
+from src.images import title_img, restart_img, smol_dice_imgs, home_img
 from src.sprite import SpriteManager
-from src.images import title_img
 from src.button import Button
 from src.level import Level
 from src.globals import *
@@ -32,7 +32,10 @@ class MainGame(Scene):
     def setup(self, path="map_1") -> None:
         super().setup()
 
-        self.level = Level(self.game, path)
+        self.level_path = path
+        self.level = Level(self.game, self.level_path)
+        Button(self.game, (10, 10), home_img, lambda: self.game.new_scene(self.game.Scenes.MainMenu), anchor=Anchor.TOPLEFT, bloat=30)
+        Button(self.game, (10, 80), restart_img, lambda: self.game.new_scene(self.game.Scenes.MainGame, path=self.level_path), anchor=Anchor.TOPLEFT, bloat=30)
 
     def update(self) -> None:
         keys = pygame.key.get_pressed()
@@ -44,7 +47,29 @@ class MainGame(Scene):
     def draw(self) -> None:
         self.game.screen.fill((20, 24, 28))
 
-        super().draw()
+        self.sprite_manager.draw()
+
+        faces = self.level.dice.faces
+        screen = self.game.screen
+
+        img = lambda direc: smol_dice_imgs[faces[direc]["num"]]
+
+        sw = screen.get_width() # screen width
+        ie = img(Direc.TOP).get_width() # image edge (size)
+        m = 10 # margin
+        c = ie # correction
+
+        transparent_surf = pygame.Surface((ie * 4, ie * 4), SRCALPHA)
+        transparent_surf.fill((255, 255, 255, 80))
+        screen.blit(transparent_surf, (sw - ie * 4 - m, 1 * ie + m - c))
+
+        screen.blit(img(Direc.BOTTOM), (sw - ie * 2 - m - ie / 2, 2 * ie + m - c + ie / 2))
+        screen.blit(img(Direc.LEFT),   (sw - ie * 3 - m - ie / 2, 2 * ie + m - c + ie / 2))
+        screen.blit(img(Direc.RIGHT),  (sw - ie * 1 - m - ie / 2, 2 * ie + m - c + ie / 2))
+        screen.blit(img(Direc.DOWN),   (sw - ie * 2 - m - ie / 2, 3 * ie + m - c + ie / 2))
+        screen.blit(img(Direc.UP),     (sw - ie * 2 - m - ie / 2, 1 * ie + m - c + ie / 2))
+
+        pygame.display.flip()
 
 class MainMenu(Scene):
     def setup(self) -> None:
@@ -71,8 +96,8 @@ class LevelsMenu(Scene):
 
         self.maps = {" ".join(map.removesuffix(".json").split("_")).capitalize(): map.removesuffix(".json") for map in listdir("res/levels")}
 
-        for i, map in enumerate(self.maps.values()):
-            Button(self.game, (WIDTH // 2, 50 + i * 50), "The one and only level", lambda map=map: self.game.new_scene(self.game.Scenes.MainGame, path=map), bloat=75)
+        for i, map in enumerate(self.maps.items()):
+            Button(self.game, (WIDTH // 2, 50 + i * 75), map[0], lambda map=map: self.game.new_scene(self.game.Scenes.MainGame, path=map[1]), bloat=75)
 
     def draw(self):
         self.game.screen.fill((20, 24, 28))

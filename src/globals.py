@@ -2,6 +2,8 @@ from pygame.math import Vector2 as VEC
 from enum import Enum
 import pygame
 
+from build.exe_comp import pathof
+
 FPS = 256
 WIDTH = 810
 HEIGHT = 500
@@ -27,4 +29,4 @@ class Anchor(Enum):
     BOTTOMRIGHT = VEC(1, 1)
 
 pygame.font.init()
-FONT = pygame.font.Font("res/fonts/Dungeons-D6mE.ttf", 32)
+FONT = pygame.font.Font(pathof("res/fonts/Dungeons-D6mE.ttf"), 32)

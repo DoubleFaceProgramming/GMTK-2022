@@ -30,8 +30,7 @@ class Void(Sprite):
         r.topleft = self.pos * TILE_SIZE - player.camera.offset
 
         if player.rect.colliderect(r):
-            pass
-            # player.pos = player.prev_pos
+            player.pos = player.prev_pos
 
 class Floor(Sprite):
     def __init__(self, layer: int | LayersEnum, game: Game, pos: VEC):
@@ -165,7 +164,6 @@ class Level:
         legend = parsed["legend"]
         map_data = parsed["map"]
 
-        die_pos = []
         self.die = []
         self.map = []
         for i, row in enumerate(map_data):
@@ -177,15 +175,14 @@ class Level:
                     player_tile_pos = (j, i)
                     sprite = Floor(LayersEnum.WORLD, self.game, (j, i))
                 elif type_class == Dice:
-                    die_pos.append((j, i))
+                    dice_pos = (j, i)
                     sprite = Floor(LayersEnum.WORLD, self.game, (j, i))
                 else:
                     sprite = type_class(LayersEnum.WORLD, self.game, (j, i))
                 self.map[i].append(sprite)
 
         self.player = Player(LayersEnum.MOVEABLES, self.game, player_tile_pos)
-        for pos in die_pos:
-            self.die.append(Dice(LayersEnum.MOVEABLES, self.game, pos))
+        self.dice = Dice(LayersEnum.MOVEABLES, self.game, dice_pos)
 
     def __getitem__(self, key: VEC):
         try:
